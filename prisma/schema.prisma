@@ -1,0 +1,100 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id         Int       @id @default(autoincrement())
+  email      String    @unique
+  password   String
+  fullName   String
+  username   String
+  address    String
+  role       String
+  latitude   Float?
+  longitude  Float?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  orders     Order[]  
+  notificationToken String?
+}
+
+model Driver {
+  id          Int       @id @default(autoincrement())
+  fullName    String
+  email       String    @unique
+  password    String
+  vehicleType String
+  phone       String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  orders      Order[]   
+  notificationToken String?
+}
+
+model Category {
+  id    Int    @id @default(autoincrement())
+  name  String
+  image String // URL to image
+    restaurants Restaurants[]
+}
+
+model Dish {
+  id           Int       @id @default(autoincrement())
+  name         String
+  price        Float
+  image        String    // URL to image
+  restaurantId Int
+  restaurant   Restaurants @relation(fields: [restaurantId], references: [id])
+  categoryId   Int
+  orderItems   OrderItem[]
+}
+
+model Restaurants {
+  id        Int       @id @default(autoincrement())
+  name      String
+  address   String
+  image     String // URL to image
+  dishes    Dish[]  // Relation to dishes
+  orders    Order[] // Relation to orders
+  categoryId Int       // Foreign key for Category
+  category   Category  @relation(fields: [categoryId], references: [id])
+  latitude   Float?
+  longitude  Float?
+}
+
+model OrderItem {
+  id       Int     @id @default(autoincrement())
+  quantity Int
+  price    Float
+  dishId   Int
+  dish     Dish    @relation(fields: [dishId], references: [id])
+  orderId  Int
+  order    Order   @relation(fields: [orderId], references: [id])
+}
+
+model Order {
+  id              Int       @id @default(autoincrement())
+  status          String
+  total           Float
+  userId          Int
+  user            User      @relation(fields: [userId], references: [id])
+  restaurantId    Int
+  restaurant      Restaurants @relation(fields: [restaurantId], references: [id])
+  driverId        Int?
+  driver          Driver?   @relation(fields: [driverId], references: [id])
+  deliveryAddress String
+  orderItems      OrderItem[]
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
