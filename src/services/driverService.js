@@ -7,9 +7,8 @@ exports.fetchDriverProfile = async (userId) => {
     select: {
       id: true,
       fullName: true,
-      address: true,
-      latitude: true,
-      longitude: true,
+      phone: true,
+      vehicleType: true,
     },
   });
 };
