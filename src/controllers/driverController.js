@@ -1,7 +1,4 @@
-const {
-  fetchDriverProfile,
-  updateDriverProfile,
-} = require("../services/driverService");
+const driverService = require("../services/driverService");
 
 exports.getDriverProfile = async (req, res) => {
   try {
