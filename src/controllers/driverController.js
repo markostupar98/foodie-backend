@@ -1,6 +1,11 @@
+const {
+  fetchDriverProfile,
+  updateDriverProfile,
+} = require("../services/driverService");
+
 exports.getDriverProfile = async (req, res) => {
   try {
-    const profile = await userService.fetchUserProfile(req.params.userId);
+    const profile = await driverService.fetchDriverProfile(req.params.userId);
     if (!profile) {
       console.log(`User not found: ${req.params.userId}`);
       return res.status(404).send("User not found");
@@ -14,7 +19,7 @@ exports.getDriverProfile = async (req, res) => {
 
 exports.updateDriverProfile = async (req, res) => {
   try {
-    const profile = await userService.updateDriverProfile(
+    const profile = await driverService.updateDriverProfile(
       req.params.driverId,
       req.body
     );
