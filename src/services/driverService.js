@@ -1,9 +1,9 @@
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
-exports.fetchDriverProfile = async (userId) => {
-  return await prisma.user.findUnique({
-    where: { id: parseInt(userId) },
+exports.fetchDriverProfile = async (driverId) => {
+  return await prisma.driver.findUnique({
+    where: { id: parseInt(driverId) },
     select: {
       id: true,
       fullName: true,
