@@ -34,9 +34,9 @@ exports.fetchRestaurantDetailsComplete = async (restaurantId) => {
     });
 
     if (!restaurant) {
-      throw new Error('Restaurant not found');
+      throw new Error("Restaurant not found");
     }
-    
+
     return restaurant;
   } catch (error) {
     console.error("Error fetching complete restaurant details:", error);

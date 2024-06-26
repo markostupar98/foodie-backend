@@ -10,15 +10,27 @@ exports.fetchUserProfile = async (userId) => {
       fullName: true,
       address: true,
       latitude: true,
-      longitude: true
-    }
+      longitude: true,
+    },
   });
-}
+};
 
 // Updating user profile
 exports.updateUserProfile = async (userId, data) => {
   return await prisma.user.update({
     where: { id: parseInt(userId) },
-    data
+    data,
   });
 };
+
+// exports.updateUserProfile = async (driverId, updatedData) => {
+//   try {
+//     const updatedProfile = await prisma.user.update({
+//       where: { id: parseInt(userId) },
+//       data: updatedData,
+//     });
+//     return { profile: updatedProfile };
+//   } catch (error) {
+//     return { error: "Error updating user profile" };
+//   }
+// };
