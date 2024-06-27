@@ -3,6 +3,7 @@ const { sendPushNotification } = require("./notificationService");
 const prisma = new PrismaClient();
 
 // Create order
+
 exports.createOrder = async (
   userId,
   restaurantId,
@@ -11,6 +12,10 @@ exports.createOrder = async (
   total
 ) => {
   try {
+    console.log(
+      `Creating order for user ${userId} at restaurant ${restaurantId}`
+    );
+
     const order = await prisma.order.create({
       data: {
         userId,
@@ -29,13 +34,19 @@ exports.createOrder = async (
       },
     });
 
-    // Fetch drivers notification tokens
+    console.log(`Order ${order.id} created successfully`);
+
+    // Fetch drivers' notification tokens
     const drivers = await prisma.driver.findMany({
       select: { notificationToken: true },
     });
 
     const notificationPromises = drivers.map(async (driver) => {
       if (driver.notificationToken) {
+        console.log(
+          `Sending notification to driver with token: ${driver.notificationToken}`
+        );
+
         try {
           await sendPushNotification(
             driver.notificationToken,
@@ -50,6 +61,8 @@ exports.createOrder = async (
             error
           );
         }
+      } else {
+        console.warn(`Driver with no notification token found`);
       }
     });
 
@@ -61,51 +74,57 @@ exports.createOrder = async (
     throw error;
   }
 };
-// exports.createOrder = async (
-//   userId,
-//   restaurantId,
-//   deliveryAddress,
-//   cartItems,
-//   total
-// ) => {
-//   try {
-//     const order = await prisma.order.create({
-//       data: {
-//         userId,
-//         restaurantId,
-//         deliveryAddress,
-//         total,
-//         status: "pending",
-//         driverId: null,
-//         orderItems: {
-//           create: cartItems.map((item) => ({
-//             dishId: item.id,
-//             quantity: item.quantity,
-//             price: item.price,
-//           })),
-//         },
-//       },
-//     });
 
-//     // Fetch all driver tokens and send notifications
-//     const drivers = await prisma.driver.findMany({
-//       select: { notificationToken: true },
-//     });
+exports.assignDriverToOrder = async (orderId, driverId) => {
+  try {
+    console.log(`Assigning driver ${driverId} to order ${orderId}`);
 
-//     const driverTokens = drivers
-//       .map((driver) => driver.notificationToken)
-//       .filter((token) => token);
-//     driverTokens.forEach((token) => {
-//       sendPushNotification(token, "Nova narudžba je dostupna!");
-//     });
+    const updatedOrder = await prisma.order.update({
+      where: { id: parseInt(orderId) },
+      data: {
+        driverId: parseInt(driverId),
+        status: "delivering",
+      },
+    });
 
-//     return order;
-//   } catch (error) {
-//     console.error(error);
-//     throw error;
-//   }
-// };
+    console.log(`Order ${orderId} updated with driver ${driverId}`);
 
+    // Fetch user notification token
+    const order = await prisma.order.findUnique({
+      where: { id: parseInt(orderId) },
+      include: { user: true },
+    });
+
+    if (order && order.user && order.user.notificationToken) {
+      const userNotificationToken = order.user.notificationToken;
+      console.log(
+        `Sending notification to user ${order.user.id} with token ${userNotificationToken}`
+      );
+
+      try {
+        await sendPushNotification(
+          userNotificationToken,
+          "Vaša narudžba je preuzeta!"
+        );
+        console.log(
+          `Notification sent to user with token: ${userNotificationToken}`
+        );
+      } catch (error) {
+        console.error(
+          `Failed to send notification to user with token: ${userNotificationToken}`,
+          error
+        );
+      }
+    } else {
+      console.warn(`No notification token found for user of order ${orderId}`);
+    }
+
+    return updatedOrder;
+  } catch (error) {
+    console.error("Error assigning driver to order:", error);
+    throw error;
+  }
+};
 // Fetch order details
 
 exports.fetchOrderDetails = async (orderId) => {
@@ -149,76 +168,4 @@ exports.fetchOrders = async () => {
       },
     },
   });
-};
-
-// Assign driver to order
-// exports.assignDriverToOrder = async (orderId, driverId) => {
-//   return await prisma.order.update({
-//     where: { id: parseInt(orderId) },
-//     data: { driverId: parseInt(driverId) },
-//   });
-// };
-// exports.assignDriverToOrder = async (orderId, driverId) => {
-//   try {
-//     const updatedOrder = await prisma.order.update({
-//       where: { id: parseInt(orderId) },
-//       data: { driverId: parseInt(driverId) },
-//     });
-
-//     // Fetch user notification token
-//     const order = await prisma.order.findUnique({
-//       where: { id: parseInt(orderId) },
-//       include: { user: true },
-//     });
-
-//     if (order && order.user && order.user.notificationToken) {
-//       const userNotificationToken = order.user.notificationToken;
-//       sendPushNotification(userNotificationToken, "Vaša narudžba je preuzeta!");
-//     }
-//     return updatedOrder;
-//   } catch (error) {
-//     console.error(error);
-//     throw error;
-//   }
-// };
-
-exports.assignDriverToOrder = async (orderId, driverId) => {
-  try {
-    const updatedOrder = await prisma.order.update({
-      where: { id: parseInt(orderId) },
-      data: {
-        driverId: parseInt(driverId),
-        status: "delivering",
-      },
-    });
-
-    // Fetch user notification token
-    const order = await prisma.order.findUnique({
-      where: { id: parseInt(orderId) },
-      include: { user: true },
-    });
-
-    if (order && order.user && order.user.notificationToken) {
-      const userNotificationToken = order.user.notificationToken;
-      try {
-        await sendPushNotification(
-          userNotificationToken,
-          "Vaša narudžba je preuzeta!"
-        );
-        console.log(
-          `Notification sent to user with token: ${userNotificationToken}`
-        );
-      } catch (error) {
-        console.error(
-          `Failed to send notification to user with token: ${userNotificationToken}`,
-          error
-        );
-      }
-    }
-
-    return updatedOrder;
-  } catch (error) {
-    console.error("Error assigning driver to order:", error);
-    throw error;
-  }
 };
