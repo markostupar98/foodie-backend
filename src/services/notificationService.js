@@ -1,5 +1,7 @@
 // sendPushNotification.js
 const admin = require("../config/firebase");
+const { PrismaClient } = require("@prisma/client");
+const prisma = new PrismaClient();
 
 exports.sendPushNotification = async (token, message) => {
   const payload = {
