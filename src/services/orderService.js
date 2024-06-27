@@ -4,7 +4,7 @@ const prisma = new PrismaClient();
 
 // Create order
 
-export const createOrder = async (req, res) => {
+exports.createOrder = async (req, res) => {
   const { userId, restaurantId, deliveryAddress, cartItems, total, fcmToken } =
     req.body;
 
@@ -80,7 +80,7 @@ export const createOrder = async (req, res) => {
 };
 
 // Assign driver to order and send notification to use
-export const assignDriverToOrder = async (req, res) => {
+exports.assignDriverToOrder = async (req, res) => {
   const { orderId, driverId } = req.body;
 
   try {
