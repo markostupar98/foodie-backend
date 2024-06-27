@@ -1,7 +1,7 @@
 // sendPushNotification.js
 const admin = require("../config/firebase");
 
-const sendPushNotification = async (token, message) => {
+exports.sendPushNotification = async (token, message) => {
   const payload = {
     notification: {
       title: "Order Update",
@@ -20,16 +20,13 @@ const sendPushNotification = async (token, message) => {
   }
 };
 
-const saveToken = async (userId, token) => {
+exports.saveToken = async (token) => {
   try {
-    await prisma.user.update({
-      where: { id: userId },
-      data: { notificationToken: token },
+    await prisma.notificationToken.create({
+      data: { token },
     });
   } catch (error) {
     console.error("Error saving token:", error);
     throw error;
   }
 };
-
-module.exports = { sendPushNotification, saveToken };

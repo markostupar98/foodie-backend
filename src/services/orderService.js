@@ -4,17 +4,20 @@ const prisma = new PrismaClient();
 
 // Create order
 
-exports.createOrder = async (
-  userId,
-  restaurantId,
-  deliveryAddress,
-  cartItems,
-  total
-) => {
+export const createOrder = async (req, res) => {
+  const { userId, restaurantId, deliveryAddress, cartItems, total, fcmToken } =
+    req.body;
+
   try {
     console.log(
       `Creating order for user ${userId} at restaurant ${restaurantId}`
     );
+
+    // Sačuvaj FCM token korisnika
+    await prisma.user.update({
+      where: { id: userId },
+      data: { notificationToken: fcmToken },
+    });
 
     const order = await prisma.order.create({
       data: {
@@ -50,7 +53,8 @@ exports.createOrder = async (
         try {
           await sendPushNotification(
             driver.notificationToken,
-            "Nova narudžba je kreirana!"
+            "Nova narudžba je kreirana!",
+            "Nova narudžba čeka na vas."
           );
           console.log(
             `Notification sent to driver with token: ${driver.notificationToken}`
@@ -68,14 +72,17 @@ exports.createOrder = async (
 
     await Promise.all(notificationPromises);
 
-    return order;
+    return res.status(201).json(order);
   } catch (error) {
     console.error("Error creating order:", error);
-    throw error;
+    return res.status(500).json({ error: "Error creating order" });
   }
 };
 
-exports.assignDriverToOrder = async (orderId, driverId) => {
+// Assign driver to order and send notification to use
+export const assignDriverToOrder = async (req, res) => {
+  const { orderId, driverId } = req.body;
+
   try {
     console.log(`Assigning driver ${driverId} to order ${orderId}`);
 
@@ -104,7 +111,8 @@ exports.assignDriverToOrder = async (orderId, driverId) => {
       try {
         await sendPushNotification(
           userNotificationToken,
-          "Vaša narudžba je preuzeta!"
+          "Vaša narudžba je preuzeta!",
+          "Vozač je preuzeo vašu narudžbu i uskoro će biti isporučena."
         );
         console.log(
           `Notification sent to user with token: ${userNotificationToken}`
@@ -119,10 +127,10 @@ exports.assignDriverToOrder = async (orderId, driverId) => {
       console.warn(`No notification token found for user of order ${orderId}`);
     }
 
-    return updatedOrder;
+    return res.status(200).json(updatedOrder);
   } catch (error) {
     console.error("Error assigning driver to order:", error);
-    throw error;
+    return res.status(500).json({ error: "Error assigning driver to order" });
   }
 };
 // Fetch order details
