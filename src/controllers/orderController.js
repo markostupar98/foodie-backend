@@ -15,7 +15,7 @@ exports.createOrder = async (req, res) => {
     );
     res.status(201).json(order);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: "Error creating order", error });
   }
 };
 // Fetch order details
@@ -45,14 +45,15 @@ exports.getOrders = async (req, res) => {
 };
 
 exports.assignDriver = async (req, res) => {
+  const { orderId, driverId } = req.body;
+
   try {
-    const { orderId, driverId } = req.body;
     const updatedOrder = await orderService.assignDriverToOrder(
       orderId,
       driverId
     );
-    res.json(updatedOrder);
+    res.status(200).json(updatedOrder);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: "Error assigning driver to order", error });
   }
 };
