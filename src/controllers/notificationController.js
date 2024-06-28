@@ -1,6 +1,7 @@
 const {
   saveToken,
   sendPushNotification,
+  saveDriverToken,
 } = require("../services/notificationService");
 
 exports.registerToken = async (req, res) => {
@@ -11,6 +12,23 @@ exports.registerToken = async (req, res) => {
     }
 
     await saveToken(userId, token);
+    res.status(200).json({ message: "Token registered successfully" });
+  } catch (error) {
+    console.error("Error registering token:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+exports.registerDriverToken = async (req, res) => {
+  try {
+    const { driverId, token } = req.body;
+    if (!driverId || !token) {
+      return res
+        .status(400)
+        .json({ message: "driverId and token are required" });
+    }
+
+    await saveDriverToken(driverId, token);
     res.status(200).json({ message: "Token registered successfully" });
   } catch (error) {
     console.error("Error registering token:", error);
