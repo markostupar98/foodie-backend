@@ -1,5 +1,6 @@
 const { PrismaClient } = require("@prisma/client");
 const { sendPushNotification } = require("./notificationService");
+const { sendNotification } = require("../controllers/notificationController");
 const prisma = new PrismaClient();
 
 // Create order
@@ -51,7 +52,7 @@ exports.createOrder = async (req, res) => {
         );
 
         try {
-          await sendPushNotification(
+          await sendNotification(
             driver.notificationToken,
             "Nova narudžba je kreirana!",
             "Nova narudžba čeka na vas."
@@ -109,7 +110,7 @@ exports.assignDriverToOrder = async (req, res) => {
       );
 
       try {
-        await sendPushNotification(
+        await sendNotification(
           userNotificationToken,
           "Vaša narudžba je preuzeta!",
           "Vozač je preuzeo vašu narudžbu i uskoro će biti isporučena."
