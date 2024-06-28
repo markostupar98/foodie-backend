@@ -9,6 +9,7 @@ exports.fetchUserProfile = async (userId) => {
       id: true,
       fullName: true,
       address: true,
+      username: true,
       latitude: true,
       longitude: true,
     },

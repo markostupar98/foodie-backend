@@ -22,13 +22,19 @@ exports.sendPushNotification = async (token, message) => {
   }
 };
 
-exports.saveToken = async (token) => {
+exports.saveToken = async (userId, token) => {
+  if (!userId || !token) {
+    throw new Error("UserId and token are required");
+  }
+
   try {
-    await prisma.notificationToken.create({
-      data: { token },
+    await prisma.user.update({
+      where: { id: userId },
+      data: { notificationToken: token },
     });
+    return { message: "Token saved successfully" };
   } catch (error) {
     console.error("Error saving token:", error);
-    throw error;
+    throw new Error("Internal server error");
   }
 };
