@@ -13,7 +13,7 @@ exports.sendPushNotification = async (token, message) => {
   };
 
   try {
-    const response = await admin.getMessaging().send(payload);
+    const response = await admin.messaging().send(payload);
     console.log("Successfully sent message:", response);
     return response;
   } catch (error) {
@@ -21,7 +21,6 @@ exports.sendPushNotification = async (token, message) => {
     throw error;
   }
 };
-
 // Save user token
 exports.saveToken = async (userId, token) => {
   if (!userId || !token) {
