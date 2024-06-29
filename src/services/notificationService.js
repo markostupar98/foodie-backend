@@ -13,7 +13,7 @@ exports.sendPushNotification = async (token, message) => {
   };
 
   try {
-    const response = await admin.messaging().send(payload);
+    const response = await admin.getMessaging().send(payload);
     console.log("Successfully sent message:", response);
     return response;
   } catch (error) {
