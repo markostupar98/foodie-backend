@@ -12,10 +12,10 @@ exports.fetchDriverProfile = async (driverId) => {
         vehicleType: true,
       },
     });
-    return { profile, error: null };
+    return { profile };
   } catch (error) {
     console.error("Error fetching driver profile:", error);
-    return { profile: null, error };
+    return null;
   }
 };
 
@@ -25,9 +25,9 @@ exports.updateDriverProfile = async (driverId, data) => {
       where: { id: parseInt(driverId) },
       data,
     });
-    return { profile: updatedProfile, error: null };
+    return { profile: updatedProfile };
   } catch (error) {
     console.error("Error updating driver profile:", error);
-    return { profile: null, error };
+    return null;
   }
 };
